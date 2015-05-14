@@ -76,6 +76,7 @@ public class Utility {
    * @param myWeatherDbOP DB操作类
    * @param fileName 省市县代号文件名
    * @param provinceId 省ID
+   * @param provinceCode 省Code
    * @return 处理结果(boolean)
    * @throws IOException
    * @throws XmlPullParserException

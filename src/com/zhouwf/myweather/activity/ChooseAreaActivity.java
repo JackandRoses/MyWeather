@@ -1,11 +1,15 @@
 package com.zhouwf.myweather.activity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -19,6 +23,8 @@ import com.zhouwf.myweather.db.MyWeatherDbOPerations;
 import com.zhouwf.myweather.model.City;
 import com.zhouwf.myweather.model.Country;
 import com.zhouwf.myweather.model.Province;
+import com.zhouwf.myweather.util.Districts;
+import com.zhouwf.myweather.util.Utility;
 
 public class ChooseAreaActivity extends Activity {
   public static final int LEVEL_PROVINCE = 0;
@@ -71,7 +77,13 @@ public class ChooseAreaActivity extends Activity {
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (currentLevel == LEVEL_PROVINCE) {
           selectedProvince = provinceList.get(position);
-          queryCities();
+          try {
+            queryCities();
+          } catch (IOException e) {
+            e.printStackTrace();
+          } catch (XmlPullParserException e) {
+            e.printStackTrace();
+          }
         }
       }
     });
@@ -80,8 +92,69 @@ public class ChooseAreaActivity extends Activity {
 
   /**
    * 查询选中省内的所有市 从数据库查询
+   * 
+   * @throws XmlPullParserException
+   * @throws IOException
    */
-  protected void queryCities() {
+  protected void queryCities() throws IOException, XmlPullParserException {
     cityList = myWeatherDbOPerations.loadCity(selectedProvince.getProvinceId());
+    if (cityList != null && cityList.size() > 0) {
+      dataList.clear();
+      for (City eachCity : cityList) {
+        dataList.add(eachCity.getCityName());
+      }
+      // 通知listView刷新
+      adapter.notifyDataSetChanged();
+      listView.setSelection(0);
+      titleText.setText(selectedProvince.getProvinceName());
+      currentLevel = LEVEL_CITY;
+    } else {
+      queryFromXml(selectedProvince.getProvinceCode(), selectedProvince.getProvinceId(), Districts.CITY);
+    }
+  }
+
+  /**
+   * 从xml中查询省市数据
+   * 
+   * @param code 省、市CODE
+   * @param id 省、市ID
+   * @param type 地区类型
+   * @throws XmlPullParserException
+   * @throws IOException
+   */
+  private void queryFromXml(final String code, final int id, final Districts type) throws IOException, XmlPullParserException {
+    if (!TextUtils.isEmpty(code)) {
+      new Thread(new Runnable() {
+        @Override
+        public void run() {
+          switch (type) {
+          case CITY:
+            try {
+              Utility.handleCitiesResponse(myWeatherDbOPerations, "location.xml", id, code);
+            } catch (IOException | XmlPullParserException e) {
+              e.printStackTrace();
+            }
+            break;
+          case COUNTRY:
+            try {
+              Utility.handleCountriesResponse(myWeatherDbOPerations, "location.xml", id, code);
+            } catch (IOException | XmlPullParserException e) {
+              e.printStackTrace();
+            }
+            break;
+          case PROVINCE:
+            try {
+              Utility.handleProvincesResponse(myWeatherDbOPerations, "location.xml");
+            } catch (IOException | XmlPullParserException e) {
+              e.printStackTrace();
+            }
+            break;
+          default:
+            // Toast.makeText(this, "数据加载失败!", Toast.LENGTH_SHORT).show();
+            break;
+          }
+        }
+      }).start();
+    }
   }
 }
