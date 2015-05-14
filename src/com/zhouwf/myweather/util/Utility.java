@@ -80,7 +80,7 @@ public class Utility {
    * @throws IOException
    * @throws XmlPullParserException
    */
-  public synchronized static boolean handleCitiesResponse(MyWeatherDbOPerations myWeatherDbOP, String fileName, int provinceId) throws IOException, XmlPullParserException {
+  public synchronized static boolean handleCitiesResponse(MyWeatherDbOPerations myWeatherDbOP, String fileName, int provinceId, String provinceCode) throws IOException, XmlPullParserException {
     if (!TextUtils.isEmpty(fileName)) {
       AssetManager assetManager = ApplicationContext.getContext().getAssets();
       InputStream is = assetManager.open(fileName);
@@ -94,7 +94,7 @@ public class Utility {
       while (eventType != XmlPullParser.END_DOCUMENT) {
         if (eventType == XmlPullParser.START_TAG) {
           // 判断城市ID是否对应省份ID
-          if (CityTbFields.TB_NAME.toLowerCase(Locale.US).equals(xmlPullParser.getName()) && Integer.parseInt(xmlPullParser.getAttributeValue(null, "id").substring(0, 2)) == provinceId) {
+          if (CityTbFields.TB_NAME.toLowerCase(Locale.US).equals(xmlPullParser.getName()) && xmlPullParser.getAttributeValue(null, "id").substring(0, 2).equals(provinceCode)) {
             city = new City();
             city.setProvinceOfCityId(provinceId);
             city.setCityCode(xmlPullParser.getAttributeValue(null, "id"));
@@ -127,7 +127,7 @@ public class Utility {
    * @throws IOException
    * @throws XmlPullParserException
    */
-  public synchronized static boolean handleCountriesResponse(MyWeatherDbOPerations myWeatherDbOP, String fileName, int cityId) throws IOException, XmlPullParserException {
+  public synchronized static boolean handleCountriesResponse(MyWeatherDbOPerations myWeatherDbOP, String fileName, int cityId, String cityCode) throws IOException, XmlPullParserException {
     if (!TextUtils.isEmpty(fileName)) {
       AssetManager assetManager = ApplicationContext.getContext().getAssets();
       InputStream is = assetManager.open(fileName);
@@ -141,7 +141,7 @@ public class Utility {
       while (eventType != XmlPullParser.END_DOCUMENT) {
         if (eventType == XmlPullParser.START_TAG) {
           // 判断城市ID是否对应省份ID
-          if (CountryTbFields.TB_NAME.toLowerCase(Locale.US).equals(xmlPullParser.getName()) && Integer.parseInt(xmlPullParser.getAttributeValue(null, "id").substring(0, 2)) == cityId) {
+          if (CountryTbFields.TB_NAME.toLowerCase(Locale.US).equals(xmlPullParser.getName()) && xmlPullParser.getAttributeValue(null, "id").substring(0, 2).equals(cityCode)) {
             country = new Country();
             country.setCityOfCountryId(cityId);
             country.setCountryCode(xmlPullParser.getAttributeValue(null, "id"));
