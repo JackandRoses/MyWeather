@@ -1,6 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-
-<China>
+﻿<China>
   <province id="01" name="北京">
     <city id="0101" name="北京">
       <country id="010101" name="北京" weatherCode="101010100"/>

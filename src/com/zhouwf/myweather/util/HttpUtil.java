@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.json.JSONException;
+
 public class HttpUtil {
   private static final String GET = "GET";
 
@@ -32,7 +34,7 @@ public class HttpUtil {
             // callBack onFinish()
             listener.onFinish(response.toString());
           }
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
           // callBack onError()
           if (listener != null) {
             listener.onError(e);
